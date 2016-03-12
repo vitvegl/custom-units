@@ -1,0 +1,13 @@
+[Unit]
+Description = Netfilter/Iptables for ipv4
+Before = network.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/sbin/iptables-restore /etc/iptables/iptables.rules
+ExecStop=/sbin/iptables -F
+ExecReload=/sbin/iptables-restore /etc/iptables/iptables.rules
+
+[Install]
+WantedBy=multi-user.target
