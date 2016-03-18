@@ -24,6 +24,11 @@ module Ufw
   def ufw_flush_all
     system "for table in security raw mangle nat filter; do /sbin/iptables -t $table -F; done"
   end
+
+  def ufw_pkg_remove
+    ufw_stop_mask
+    system "apt-get -y remove ufw"
+  end
 end
 
 namespace :iptables do
@@ -39,6 +44,7 @@ namespace :iptables do
   desc 'copying iptables rules and starting service'
   task :service => ['ufw:stop', 'rules', 'unit'] do
     sh "systemctl enable iptables && systemctl restart iptables"
+    Rake::Task['ufw:removepkg'].invoke
   end
 end
 
@@ -48,5 +54,9 @@ namespace :ufw do
   desc 'stopping and mask ufw as service'
   task :stop do
     ufw_stop_mask
+  end
+
+  task :removepkg do
+    ufw_pkg_remove
   end
 end
