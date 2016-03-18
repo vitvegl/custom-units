@@ -43,7 +43,7 @@ namespace :iptables do
 
   desc 'copying iptables rules and starting service'
   task :service => ['ufw:stop', 'rules', 'unit'] do
-    sh "systemctl enable iptables && systemctl restart iptables"
+    sh "systemctl enable iptables; systemctl restart iptables"
     Rake::Task['ufw:removepkg'].invoke
   end
 end
