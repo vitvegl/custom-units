@@ -20,10 +20,10 @@ module Iptables
 
   def ipt_rules_cp
     Dir.mkdir RULESDIR unless Dir.exist? RULESDIR
-    FileUtils.cp_r RULES, RULESDST
+    cp_r RULES, RULESDST
   end
   def ipt_unit_cp
-    FileUtils.cp_r UNIT, UNITDST
+    cp_r UNIT, UNITDST
   end
 end
 
