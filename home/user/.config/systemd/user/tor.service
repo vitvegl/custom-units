@@ -1,0 +1,11 @@
+[Unit]
+Description = Tor Network
+After = iptables.service
+
+[Service]
+RemainAfterExit=yes
+ExecStart=/usr/bin/tor -RunAsDaemon 0
+ExecStop=/bin/kill -HUP ${MAINPID}
+
+[Install]
+WantedBy=network.target
