@@ -19,11 +19,23 @@ module Iptables
   UNITDST='/etc/systemd/system/iptables.service'
 
   def ipt_rules_cp
-    Dir.mkdir RULESDIR unless Dir.exist? RULESDIR
+    mkdir RULESDIR unless Dir.exist? RULESDIR
     cp_r RULES, RULESDST
   end
   def ipt_unit_cp
     cp_r UNIT, UNITDST
+  end
+
+  def ipt_enable_service
+    sh "systemctl enable iptables.service"
+  end
+
+  def ipt_start_service
+    sh "systemctl start iptables.service"
+  end
+
+  def ipt_restart_service
+    sh "systemctl restart iptables.service"
   end
 end
 
@@ -60,7 +72,7 @@ module Tor
   end
 
   def tor_unit_cp
-    Dir.mkdir USERUNITDIR unless Dir.exist? USERUNITDIR
+    mkdir_p USERUNITDIR unless Dir.exist? USERUNITDIR
     cp_r UNIT, UNITDST
   end
 
@@ -70,6 +82,12 @@ module Tor
 
   def tor_start_service
     system "systemctl --user restart tor.service"
+  end
+
+  def tor_system_stop_mask
+    system "sudo systemctl disable tor.service"
+    system "sudo systemctl stop tor.service"
+    system "sudo systemctl mask tor.service"
   end
 end
 
@@ -91,6 +109,7 @@ namespace :tor do
 
   task :pkg_install do
     tor_pkg_install
+    tor_system_stop_mask
   end
 
   task :unit_cp do
@@ -110,8 +129,9 @@ namespace :iptables do
 
   desc 'copying iptables rules and starting service'
   task :service => ['ufw:stop', 'rules', 'unit'] do
-    sh "systemctl enable iptables; systemctl restart iptables"
     Rake::Task['ufw:removepkg'].invoke
+    ipt_enable_service
+    ipt_start_service
   end
 end
 
