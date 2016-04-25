@@ -8,6 +8,31 @@ module Systemd
   end
 end
 
+module NetworkManager
+
+  include Systemd
+
+  UNIT='etc/systemd/system/NetworkManager.service'
+  UNITDIR='/etc/systemd/system'
+  UNITDST=File.join(UNITDIR, 'NetworkManager.service')
+
+  def nm_unit_cp
+    cp_r UNIT, UNITDST
+  end
+
+  def nm_enable_service
+    sh "systemctl enable NetworkManager.service"
+  end
+
+  def nm_start_service
+    sh "systemctl start NetworkManager.service"
+  end
+
+  def nm_restart_service
+    sh "systemctl restart NetworkManager.service"
+  end
+end
+
 module Iptables
 
   include Systemd
@@ -145,5 +170,18 @@ namespace :ufw do
 
   task :removepkg do
     ufw_pkg_remove
+  end
+end
+
+namespace :nm do
+  include ::NetworkManager
+  namespace :xenial do
+    desc 'NetworkManager service for Ubuntu 16.04 LTS (apparmor fix)'
+    task :service do
+      nm_unit_cp unless File.exist? UNITDST
+      nm_enable_service unless File.symlink?(File.join(UNITDIR, 'multi-user.target.wants/NetworkManager.service'))
+      daemon_reload
+      nm_restart_service
+    end
   end
 end
